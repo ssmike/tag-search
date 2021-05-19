@@ -1,4 +1,4 @@
-(ns tag-search.core
+(ns tag-search.service
   (:gen-class)
   (:require [ring.adapter.jetty :as jetty]
             [compojure.route :as route]
