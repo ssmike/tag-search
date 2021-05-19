@@ -22,7 +22,6 @@
 
     (GET "/audio/:id" [id]
          (let [{by-id :by-id index :index} (:index @state)
-               _ (println (-> id Integer. by-id index))
                track (-> id Integer. by-id index :path)]
            {:status 200 :body (io/file track) :content-type "application/octet-stream"}))
 
