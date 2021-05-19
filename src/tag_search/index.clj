@@ -1,6 +1,7 @@
 (ns tag-search.index
   (:require [clojure.java.io :as io]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [clojure.stacktrace])
   (:import [org.jaudiotagger.audio AudioFileIO]
            [org.jaudiotagger.tag FieldKey]))
 
@@ -32,6 +33,9 @@
   (try
     (extract-file-meta file)
    (catch org.jaudiotagger.audio.exceptions.CannotReadException _
+     nil)
+   (catch java.lang.Exception e
+     (clojure.stacktrace/print-stack-trace e)
      nil)))
 
 

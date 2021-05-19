@@ -13,4 +13,5 @@
                  [org.clojure/data.json "2.3.0"]
                  [org.clojure/tools.logging "1.1.0"]]
   :main tag-search.core
+  :aot [tag-search.core]
   :repl-options {:init-ns tag-search.core})

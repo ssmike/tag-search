@@ -8,7 +8,8 @@
             [tag-search.search :as search]
             [clojure.data.json :as json]
             [clojure.tools.cli :refer [parse-opts]]
-            [clojure.tools.logging :as log]))
+            [clojure.tools.logging :as log]
+            [clojure.stacktrace]))
 
 
 (defn handler
@@ -30,14 +31,19 @@
 
 (defn worker
   [base delay]
-  (let [state (atom {})]
+  (let [state (atom {})
+        build (fn [] (swap! state assoc :index (index/build-index base)))]
+    (build)
     {:state state
      :worker (future
-               (while true
-                 (swap! state assoc :index (index/build-index base))
-                 (log/info "base built")
-                 ; seconds
-                 (Thread/sleep (* 1000 delay))))}))
+               (try
+                 (while true
+                   (Thread/sleep (* 1000 delay)))
+                   (build)
+                   (log/info "base rebuilt")
+                   ; seconds
+                 (catch java.lang.Exception e
+                    (clojure.stacktrace/print-stack-trace e))))}))
 
 
 (def cli-options
