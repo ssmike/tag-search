@@ -10,6 +10,7 @@
                  [compojure "1.6.2"]
                  [org/jaudiotagger "2.0.3"]
                  [org.clojure/tools.cli "1.0.206"]
-                 [org.clojure/data.json "2.3.0"]]
+                 [org.clojure/data.json "2.3.0"]
+                 [org.clojure/tools.logging "1.1.0"]]
   :main tag-search.core
   :repl-options {:init-ns tag-search.core})

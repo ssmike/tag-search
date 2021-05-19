@@ -1,4 +1,5 @@
 (ns tag-search.core
+  (:gen-class)
   (:require [ring.adapter.jetty :as jetty]
             [compojure.route :as route]
             [compojure.core :refer [defroutes, GET, POST, routes]]
@@ -6,7 +7,8 @@
             [tag-search.index :as index]
             [tag-search.search :as search]
             [clojure.data.json :as json]
-            [clojure.tools.cli :refer [parse-opts]]))
+            [clojure.tools.cli :refer [parse-opts]]
+            [clojure.tools.logging :as log]))
 
 
 (defn handler
@@ -33,6 +35,7 @@
      :worker (future
                (while true
                  (swap! state assoc :index (index/build-index base))
+                 (log/info "base built")
                  ; seconds
                  (Thread/sleep (* 1000 delay))))}))
 
