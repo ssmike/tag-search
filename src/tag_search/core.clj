@@ -9,7 +9,8 @@
             [clojure.data.json :as json]
             [clojure.tools.cli :refer [parse-opts]]
             [clojure.tools.logging :as log]
-            [clojure.stacktrace]))
+            [clojure.stacktrace]
+            [clojure.java.io :as io]))
 
 
 (defn handler
@@ -18,6 +19,12 @@
     (GET "/test" request
          (println request)
          (str request))
+
+    (GET "/audio/:id" [id]
+         (let [{by-id :by-id index :index} (:index @state)
+               _ (println (-> id Integer. by-id index))
+               track (-> id Integer. by-id index :path)]
+           {:status 200 :body (io/file track) :content-type "application/octet-stream"}))
 
     (GET "/search" req
          (json/write-str
@@ -60,16 +67,19 @@
     :parse-fn str
     :default "."]])
 
+(defn run-server
+  [{state :state} port]
+  (jetty/run-jetty (wrap-defaults (handler state) api-defaults)
+                     {:port port :join? false}))
+
 (defn -main
   [& args]
   (let [{port :port delay :delay base :base} (:options (parse-opts args cli-options))
         worker (worker base delay)]
-    (jetty/run-jetty (wrap-defaults (handler (:state worker)) api-defaults)
-                     {:port port :join? false})))
+    (run-server worker port)))
 
 (comment
-  (
-   (def srv (-main  "-d" "300" "-p" "9999" "-b" "/home/ssmike/Downloads"))
-   (.stop srv))
-
+   (def *worker (worker "/home/ssmike/Downloads" 2000))
+   (def srv (run-server *worker 9090))
+   (.stop srv)
   )

@@ -23,8 +23,9 @@
                 .getTag)
         key-map {:artist FieldKey/ARTIST
                  :album FieldKey/ALBUM
-                 :title FieldKey/TITLE}]
-    (into {:path (.getPath file)}
+                 :title FieldKey/TITLE}
+        path (.getPath file)]
+    (into {:path path :id (hash path)}
           (map #(do {(key %) (.getFirst tag (val %))}) key-map))))
 
 
@@ -51,7 +52,7 @@
 
 (defn extract-keys
   [meta]
-  (->> (dissoc meta :path)
+  (->> (dissoc meta :path :id)
        (map (fn [[k v]]
               (map #(list % k)
                    (filter (comp not empty?)
@@ -76,8 +77,10 @@
          keys (for [i (range len)
                       token (extract-keys (meta-vector i))]
                   (let [[word keyw] token]
-                    [word [keyw i]]))]
+                    [word [keyw i]]))
+         by-id (into {} (map (fn [i] [(-> i meta-vector :id) i]) (range len)))]
      {:index meta-vector
+      :by-id by-id
       :inverted-index (group-by-keys keys)}))
 
 (defn build-index
