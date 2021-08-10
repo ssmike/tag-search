@@ -1,7 +1,8 @@
 (ns tag-search.index
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [clojure.stacktrace])
+            [clojure.stacktrace]
+            [clojure.edn :as edn])
   (:import [org.jaudiotagger.audio AudioFileIO]
            [org.jaudiotagger.tag FieldKey]))
 
@@ -87,6 +88,17 @@
   [base]
   (build-index-map (extract-meta base)))
 
+(defn read-index
+  [fname]
+  (with-open [file (-> fname io/file io/reader java.io.PushbackReader.)]
+    (edn/read file)))
+
+(defn write-index
+  [fname data]
+  (let [tmpname (+ fname ".tmp")]
+    (with-open [file (-> tmpname io/file io/writer)]
+      (spit file data))
+    (-> tmpname io/file (.renameTo (io/file fname)))))
 
 (comment
   (def base "/home/ssmike/Downloads")
@@ -94,5 +106,9 @@
 
   (def flacs (filter #(str/ends-with? (.getPath %) ".flac") (list-files base)))
 
-  (:inverted-index (build-index (extract-meta base)))
+  (let [data [{1 2 3 4} 5]
+        _ (write-index "/tmp/index" data)]
+    (= data (read-index "/tmp/index")))
+
+  (:inverted-index (build-index-map (extract-meta base)))
   )

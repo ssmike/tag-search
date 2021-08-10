@@ -36,10 +36,17 @@
 
 
 (defn worker
-  [base delay]
+  [base delay index]
   (let [state (atom {})
         build (fn [] (swap! state assoc :index (index/build-index base)))]
-    (build)
+    (try
+      (if (and (not (nil? index)) (-> index io/file .exists))
+        (let [restored-index (index/read-index base)]
+          (swap! state assoc :index restored-index))
+        (build))
+      (catch java.lang.Exception e
+        (clojure.stacktrace/print-stack-trace e)
+        (build)))
     {:state state
      :worker (future
                (try
@@ -61,10 +68,13 @@
     :required true
     :id :delay
     :parse-fn #(Integer/parseInt %)]
-   ["-b" "--base BASE PATH"
+   ["-b" "--base BASE_PATH"
     :id :base
     :parse-fn str
-    :default "."]])
+    :default "."]
+   ["-i" "--index INDEX_FILE"
+    :id :index
+    :default nil]])
 
 (defn run-server
   [{state :state} port]
@@ -73,8 +83,8 @@
 
 (defn -main
   [& args]
-  (let [{port :port delay :delay base :base} (:options (parse-opts args cli-options))
-        worker (worker base delay)]
+  (let [{port :port delay :delay base :base index :index} (:options (parse-opts args cli-options))
+        worker (worker base delay index)]
     (run-server worker port)))
 
 (comment
