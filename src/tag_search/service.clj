@@ -54,7 +54,8 @@
                    (Thread/sleep (* 1000 delay)))
                    (build)
                    (log/info "base rebuilt")
-                   ; seconds
+                   (log/debug (.concat "writing to built index to " index))
+                   (index/write-index index (:index @state))
                  (catch java.lang.Exception e
                     (clojure.stacktrace/print-stack-trace e))))}))
 

@@ -30,6 +30,6 @@
 
 
 (comment
-  (def base (index/build-index (index/extract-meta index/base)))
+  (def base (index/build-index index/base))
   (search base "Is the answer" 300)
   )
