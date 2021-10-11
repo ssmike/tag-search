@@ -31,9 +31,9 @@
 
 (defn uber [_]
   (clean nil)
-  (b/copy-dir {:src-dirs ["src" "resources"]
+  (b/copy-dir {:src-dirs ["resources"]
                :target-dir class-dir})
-
+  (compile nil)
   (b/uber {:class-dir class-dir
            :uber-file uber-file
            :main main
